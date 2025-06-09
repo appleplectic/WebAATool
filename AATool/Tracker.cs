@@ -10,6 +10,7 @@ using AATool.Exceptions;
 using AATool.Net;
 using AATool.Saves;
 using AATool.Utilities;
+using Newtonsoft.Json;
 
 namespace AATool
 {
@@ -322,6 +323,45 @@ namespace AATool
                 {
                     UpdateCurrentWorld();
                     ReadLocalFiles(time);
+                    var complexObjs = ComplexObjectives.AllByName.ToDictionary(
+                        pair => pair.Key,
+                        pair => new Dictionary<string, object> {
+                            { "statusName", pair.Value.FullStatus }, 
+                            { "isComplete", pair.Value.IsComplete() },
+                            { "isPartiallyComplete", pair.Value.Partial }
+                        }
+                    );
+                    
+                    var transformedAdvs = Advancements.AllAdvancements.ToDictionary(
+                        pair => pair.Key,
+                        pair => {
+                            var value = pair.Value;
+
+                            var criteria = value.HasCriteria
+                                ? value.Criteria.All.ToDictionary(
+                                    c => c.Key,
+                                    c => c.Value.IsComplete()
+                                )
+                                : new Dictionary<string, bool>();
+
+                            return new
+                            {
+                                isComplete = value.IsComplete(),
+                                statusName = value.FullStatus,
+                                hasCriteria = value.HasCriteria,
+                                criteria
+                            };
+                        }
+                    );
+
+                    var finalDict = new Dictionary<string, object> {
+                        {"complexObjectives", complexObjs},
+                        {"advancements", transformedAdvs},
+                        {"IGT", GetFullIgt()}
+                    };
+                    
+                    string json = JsonConvert.SerializeObject(finalDict);
+                    // TODO: SEND JSON
                 }
                 PreviousActiveId = ActiveInstance.LastActiveId;
                 UpdateFileSystemWatchers();
