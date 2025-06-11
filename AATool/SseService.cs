@@ -36,6 +36,7 @@ namespace AATool
                         response.ContentType = "text/event-stream";
                         response.Headers.Add("Cache-Control", "no-cache");
                         response.Headers.Add("Access-Control-Allow-Origin", "*");
+                        response.Headers.Add("Access-Control-Allow-Headers", "*");
                         response.SendChunked = true;
 
                         _clients.Add(response);
@@ -77,7 +78,8 @@ namespace AATool
             {
                 while (true)
                 {
-                    await response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(": ping\n\n"), 0, 9);
+                    byte[] pingBytes = Encoding.UTF8.GetBytes(": ping\n\n");
+                    await response.OutputStream.WriteAsync(pingBytes, 0, pingBytes.Length);
                     await response.OutputStream.FlushAsync();
                     Log("DEBUG", "Sent keep-alive ping.");
                     await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(30));

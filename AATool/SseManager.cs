@@ -8,7 +8,7 @@ namespace AATool
 
         public static void Start()
         {
-            Instance.Start("http://localhost:5974/sse/");
+            Instance.Start("http://127.0.0.1:5974/sse/");
         }
 
         public static void Broadcast(string json)
