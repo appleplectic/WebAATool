@@ -9,12 +9,10 @@ namespace AATool
         public static void Start()
         {
             Instance.Start("http://localhost:5974/sse/");
-            Console.WriteLine("SSE Server started.");
         }
 
         public static void Broadcast(string json)
         {
-            Console.WriteLine("Broadcasting...");
             Instance.PushUpdate(json);
         }
     }

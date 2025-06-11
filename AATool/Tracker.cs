@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using AATool.Configuration;
 using AATool.Data.Categories;
 using AATool.Data.Objectives;
@@ -17,6 +18,103 @@ namespace AATool
 {
     public static class Tracker
     {
+        public static string CleanString(string input)
+        {
+            var builder = new StringBuilder();
+            foreach (char c in input)
+            {
+                if (c >= 32 && c <= 126)
+                    builder.Append(c);
+                else
+                    builder.Append(' ');
+            }
+            return builder.ToString();
+        }
+        
+        public static readonly Dictionary<string, int> advancement_ids = new Dictionary<string, int> {
+            { "Minecraft", 1 },
+            { "Stone Age", 2 },
+            { "Getting an Upgrade", 3 },
+            { "Acquire Hardware", 4 },
+            { "Isn't It Iron Pick", 5 },
+            { "Hot Stuff", 6 },
+            { "We Need to Go Deeper", 7 },
+            { "Adventure", 8 },
+            { "Monster Hunter", 9 },
+            { "Husbandry", 10 },
+            { "Nether", 11 },
+            { "Those Were the Days", 12 },
+            { "Oh Shiny", 13 },
+            { "War Pigs", 14 },
+            { "Ice Bucket Challenge", 15 },
+            { "Who's Cutting Onions?", 16 },
+            { "Suit Up", 17 },
+            { "Not Quite \"Nine\" Lives", 18 },
+            { "A Terrible Fortress", 19 },
+            { "Into Fire", 20 },
+            { "Return to Sender", 21 },
+            { "Eye Spy", 22 },
+            { "The End?", 23 },
+            { "The End", 24 },
+            { "Take Aim", 25 },
+            { "Free the End", 26 },
+            { "Remote Getaway", 27 },
+            { "City at the End of the Game", 28 },
+            { "Sky's the Limit", 29 },
+            { "Cover Me With Diamonds", 30 },
+            { "Great View From Here", 31 },
+            { "The Next Generation", 32 },
+            { "Ol' Betsy", 33 },
+            { "Diamonds!", 34 },
+            { "Enchanter", 35 },
+            { "What a Deal!", 36 },
+            { "Zombie Doctor", 37 },
+            { "Not Today, Thank You", 38 },
+            { "Bullseye", 39 },
+            { "A Seedy Place", 40 },
+            { "Fishy Business", 41 },
+            { "Hired Help", 42 },
+            { "Sniper Duel", 43 },
+            { "Country Lode, Take Me Home", 44 },
+            { "Hidden in the Depths", 45 },
+            { "Subspace Bubble", 46 },
+            { "Uneasy Alliance", 47 },
+            { "This Boat Has Legs", 48 },
+            { "Spooky Scary Skeleton", 49 },
+            { "Two Birds, One Arrow", 50 },
+            { "Sweet Dreams", 51 },
+            { "Tactical Fishing", 52 },
+            { "Arbalistic", 53 },
+            { "The Parrots and the Bats", 54 },
+            { "Best Friends Forever", 55 },
+            { "Total Beelocation", 56 },
+            { "A Throwaway Joke", 57 },
+            { "Very Very Frightening", 58 },
+            { "Bee Our Guest", 59 },
+            { "Sticky Situation", 60 },
+            { "Voluntary Exile", 61 },
+            { "Who's the Pillager Now?", 62 },
+            { "Hero of the Village", 63 },
+            { "Cover Me in Debris", 64 },
+            { "Serious Dedication", 65 },
+            { "Local Brewery", 66 },
+            { "How Did We Get Here?", 67 },
+            { "A Furious Cocktail", 68 },
+            { "Withering Heights", 69 },
+            { "Bring Home the Beacon", 70 },
+            { "Beaconator", 71 },
+            { "The End... Again...", 72 },
+            { "Postmortal", 73 },
+            { "You Need a Mint", 74 },
+            { "A Balanced Diet", -1 },
+            { "A Complete Catalogue", -1 },
+            { "Adventuring Time", -1 },
+            { "Monsters Hunted", -1 },
+            { "Two by Two", -1 },
+            { "Hot Tourist Destinations", -1 }
+
+        };
+
         public static readonly AdvancementManifest Advancements = new ();
         public static readonly AchievementManifest Achievements = new ();
         public static readonly ComplexObjectiveManifest ComplexObjectives = new ();
@@ -354,15 +452,17 @@ namespace AATool
                             if (value.Icon == "summon_wither" || value.Icon == "enchant_item")
                                 ending = ".gif";
 
-                            string name = value.FullStatus;
+                            string name = CleanString(value.FullStatus).Replace("  ", " ").Trim();
+                            string ename = name;
                             if (name.Contains("\""))
-                                name = name.Replace("\"", "\\\"");
+                                ename = name.Replace("\"", "\\\"");
                             
                             return new
                             {
                                 isComplete = value.IsComplete(),
                                 isPartial = value.Partial,
-                                statusName = name,
+                                statusName = ename,
+                                order = advancement_ids[name],
                                 assetName = value.Icon + ending,
                                 hasCriteria = value.HasCriteria,
                                 criteria
@@ -386,7 +486,7 @@ namespace AATool
                     
                     string json = JsonConvert.SerializeObject(finalDict);
                     SseManager.Broadcast(json);
-                    Console.WriteLine(json);
+                    // Console.WriteLine(json);
                 }
                 PreviousActiveId = ActiveInstance.LastActiveId;
                 UpdateFileSystemWatchers();
