@@ -71,6 +71,8 @@ namespace AATool
 
         public Main()
         {
+            SseManager.Start();
+            
             Version = Assembly.GetExecutingAssembly().GetName().Version;
             GraphicsManager = new GraphicsDeviceManager(this);
             RNG = new Random();

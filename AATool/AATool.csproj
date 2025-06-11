@@ -234,6 +234,8 @@
     <Compile Include="Net\PeerObject.cs" />
     <Compile Include="Net\Protocol.cs" />
     <Compile Include="Net\Server.cs" />
+    <Compile Include="SseManager.cs" />
+    <Compile Include="SseService.cs" />
     <Compile Include="Tracker.cs" />
     <Compile Include="UI\Badges\Badge.cs" />
     <Compile Include="UI\Badges\HundredHardcoreBadge.cs" />

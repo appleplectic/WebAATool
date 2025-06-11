@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using AATool.Configuration;
 using AATool.Data.Categories;
 using AATool.Data.Objectives;
@@ -21,6 +22,8 @@ namespace AATool
         public static readonly ComplexObjectiveManifest ComplexObjectives = new ();
         public static readonly BlockManifest Blocks = new ();
         public static readonly DeathManifest Deaths = new ();
+        
+        private static readonly HttpClient httpClient = new HttpClient();
 
         public static Category Category { get; private set; }
         public static WorldState State { get; private set; } = new();
@@ -339,29 +342,51 @@ namespace AATool
 
                             var criteria = value.HasCriteria
                                 ? value.Criteria.All.ToDictionary(
-                                    c => c.Key,
-                                    c => c.Value.IsComplete()
+                                    c => c.Value.FullStatus,
+                                    c => new Dictionary<string, object>{
+                                        { "filepath", c.Value.Icon },
+                                        { "isComplete", c.Value.IsComplete() }
+                                    }
                                 )
-                                : new Dictionary<string, bool>();
+                                : new Dictionary<string, Dictionary<string, object>>();
 
+                            string ending = ".png";
+                            if (value.Icon == "summon_wither" || value.Icon == "enchant_item")
+                                ending = ".gif";
+
+                            string name = value.FullStatus;
+                            if (name.Contains("\""))
+                                name = name.Replace("\"", "\\\"");
+                            
                             return new
                             {
                                 isComplete = value.IsComplete(),
-                                statusName = value.FullStatus,
+                                isPartial = value.Partial,
+                                statusName = name,
+                                assetName = value.Icon + ending,
                                 hasCriteria = value.HasCriteria,
                                 criteria
                             };
                         }
                     );
 
+                    string name;
+                    if (!Player.TryGetName(GetMainPlayer(), out name))
+                        name = Config.Tracking.LastPlayer;
+                    
                     var finalDict = new Dictionary<string, object> {
+                        {"worldName", WorldName ?? ""},
+                        {"version", Category.CurrentVersion},
+                        {"category", Category.Name},
+                        {"username", name},
                         {"complexObjectives", complexObjs},
                         {"advancements", transformedAdvs},
                         {"IGT", GetFullIgt()}
                     };
                     
                     string json = JsonConvert.SerializeObject(finalDict);
-                    // TODO: SEND JSON
+                    SseManager.Broadcast(json);
+                    Console.WriteLine(json);
                 }
                 PreviousActiveId = ActiveInstance.LastActiveId;
                 UpdateFileSystemWatchers();
