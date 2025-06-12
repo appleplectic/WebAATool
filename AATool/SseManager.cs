@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace AATool
@@ -33,7 +34,17 @@ namespace AATool
 
             Process process = new Process { StartInfo = psi };
             
-            process.OutputDataReceived += (s, e) => Console.WriteLine(e.Data);
+            process.OutputDataReceived += (s, e) =>
+            {
+                if (e.Data != null)
+                {
+                    Console.WriteLine(e.Data);
+                    var match = Regex.Match(e.Data, @"https:\/\/[^\s]+\.loca\.lt");
+                    if (match.Success)
+                        Process.Start("https://appleplectic.github.io/WebAATool-website/?server=" + match.Value);
+                }
+            };
+
             process.ErrorDataReceived += (s, e) => Console.Error.WriteLine(e.Data);
 
             process.Start();
@@ -49,7 +60,6 @@ namespace AATool
             {
                 IsBackground = true
             }.Start();
-            
         }
 
         public static void Start()
