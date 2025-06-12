@@ -28,37 +28,28 @@ namespace AATool
                 try
                 {
                     var context = await _listener.GetContextAsync();
-                    if (context.Request.Url.AbsolutePath == "/sse")
+                    Log("INFO", $"Client connected: {context.Request.RemoteEndPoint}");
+
+                    var response = context.Response;
+                    response.ContentType = "text/event-stream";
+                    response.Headers.Add("Cache-Control", "no-cache");
+                    response.Headers.Add("Access-Control-Allow-Origin", "*");
+                    response.Headers.Add("Access-Control-Allow-Headers", "*");
+                    response.SendChunked = true;
+
+                    _clients.Add(response);
+                    Log("INFO", $"Total connected clients: {_clients.Count}");
+
+                    if (!string.IsNullOrEmpty(_latestJson))
                     {
-                        Log("INFO", $"Client connected: {context.Request.RemoteEndPoint}");
-
-                        var response = context.Response;
-                        response.ContentType = "text/event-stream";
-                        response.Headers.Add("Cache-Control", "no-cache");
-                        response.Headers.Add("Access-Control-Allow-Origin", "*");
-                        response.Headers.Add("Access-Control-Allow-Headers", "*");
-                        response.SendChunked = true;
-
-                        _clients.Add(response);
-                        Log("INFO", $"Total connected clients: {_clients.Count}");
-
-                        if (!string.IsNullOrEmpty(_latestJson))
-                        {
-                            var initialMessage = $"data: {_latestJson}\n\n";
-                            var bytes = Encoding.UTF8.GetBytes(initialMessage);
-                            await response.OutputStream.WriteAsync(bytes, 0, bytes.Length);
-                            await response.OutputStream.FlushAsync();
-                            Log("DEBUG", "Sent initial JSON to new client.");
-                        }
-
-                        _ = KeepAlivePing(response);
+                        var initialMessage = $"data: {_latestJson}\n\n";
+                        var bytes = Encoding.UTF8.GetBytes(initialMessage);
+                        await response.OutputStream.WriteAsync(bytes, 0, bytes.Length);
+                        await response.OutputStream.FlushAsync();
+                        Log("DEBUG", "Sent initial JSON to new client.");
                     }
-                    else
-                    {
-                        context.Response.StatusCode = 404;
-                        context.Response.Close();
-                        Log("WARN", $"Rejected request to unsupported path: {context.Request.Url.AbsolutePath}");
-                    }
+
+                    _ = KeepAlivePing(response);
                 }
                 catch (HttpListenerException ex)
                 {
@@ -81,7 +72,7 @@ namespace AATool
                     byte[] pingBytes = Encoding.UTF8.GetBytes(": ping\n\n");
                     await response.OutputStream.WriteAsync(pingBytes, 0, pingBytes.Length);
                     await response.OutputStream.FlushAsync();
-                    Log("DEBUG", "Sent keep-alive ping.");
+                    // Log("DEBUG", "Sent keep-alive ping.");
                     await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(30));
                 }
             }

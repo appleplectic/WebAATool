@@ -10112,6 +10112,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\supporters\supporter_emerald.png" />
+    <Content Include="LICENSE-localtunnel" />
+    <EmbeddedResource Include="lt.exe" />
     <Content Include="Resources\supporters\supporter_dedication.png" />
     <Content Include="Resources\supporters\supporter_beta.gif" />
     <Content Include="Resources\supporters\supporter_patreon_gold.png" />
