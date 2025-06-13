@@ -464,7 +464,6 @@ namespace AATool
                                 statusName = ename,
                                 order = advancement_ids[name],
                                 assetName = value.Icon + ending,
-                                hasCriteria = value.HasCriteria,
                                 criteria
                             };
                         }
