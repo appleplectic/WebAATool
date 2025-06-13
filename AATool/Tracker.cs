@@ -106,11 +106,11 @@ namespace AATool
             { "The End... Again...", 72 },
             { "Postmortal", 73 },
             { "You Need a Mint", 74 },
-            { "A Balanced Diet", -1 },
-            { "A Complete Catalogue", -1 },
-            { "Adventuring Time", -1 },
-            { "Monsters Hunted", -1 },
-            { "Two by Two", -1 },
+            { "A Balanced Diet", -5 },
+            { "A Complete Catalogue", -2 },
+            { "Adventuring Time", -6 },
+            { "Monsters Hunted", -4 },
+            { "Two by Two", -3 },
             { "Hot Tourist Destinations", -1 }
 
         };
@@ -429,12 +429,12 @@ namespace AATool
                         pair => new Dictionary<string, object> {
                             { "statusName", pair.Value.FullStatus }, 
                             { "isComplete", pair.Value.IsComplete() },
-                            { "isPartiallyComplete", pair.Value.Partial }
+                            { "isPartial", pair.Value.Partial }
                         }
                     );
                     
                     var transformedAdvs = Advancements.AllAdvancements.ToDictionary(
-                        pair => pair.Key,
+                        pair => advancement_ids[CleanString(pair.Value.FullStatus).Replace("  ", " ").Trim()],
                         pair => {
                             var value = pair.Value;
 
@@ -462,7 +462,6 @@ namespace AATool
                                 isComplete = value.IsComplete(),
                                 isPartial = value.Partial,
                                 statusName = ename,
-                                order = advancement_ids[name],
                                 assetName = value.Icon + ending,
                                 criteria
                             };
