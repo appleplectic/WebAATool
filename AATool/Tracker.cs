@@ -483,7 +483,7 @@ namespace AATool
                     
                     string json = JsonConvert.SerializeObject(finalDict);
                     SseManager.Broadcast(json);
-                    Console.WriteLine(json);
+                    // Console.WriteLine(json);
                 }
                 PreviousActiveId = ActiveInstance.LastActiveId;
                 UpdateFileSystemWatchers();
