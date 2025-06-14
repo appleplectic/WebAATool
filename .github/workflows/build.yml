@@ -1,0 +1,31 @@
+name: Build AATool
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore AATool.sln
+
+      - name: Build solution
+        run: msbuild AATool.sln /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Upload App1 build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: AATool-build
+          path: compiled/release/
