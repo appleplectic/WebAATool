@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -12,9 +13,14 @@ namespace AATool
         private static void GlobalThreadExceptionHandler(object sender, ThreadExceptionEventArgs e) =>
             Debug.SaveReport(e.Exception);
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool AllocConsole();
+        
         [STAThread]
         static void Main()
         {
+            AllocConsole();
+            
             //add crash reporting events
             AppDomain.CurrentDomain.UnhandledException += GlobalUnhandledExceptionHandler;
             Application.ThreadException += GlobalThreadExceptionHandler;
@@ -24,6 +30,8 @@ namespace AATool
             Application.SetCompatibleTextRenderingDefault(false);
             using (var main = new Main())
                 main.Run();
+            
+            Console.ReadLine();
         }
     }
 }
