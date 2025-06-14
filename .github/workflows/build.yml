@@ -24,7 +24,7 @@ jobs:
       - name: Build solution
         run: msbuild AATool.sln /p:Configuration=Release /p:Platform="Any CPU"
 
-      - name: Upload App1 build output
+      - name: Upload AATool build output
         uses: actions/upload-artifact@v4
         with:
           name: AATool-build
